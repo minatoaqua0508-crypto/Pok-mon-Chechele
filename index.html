@@ -887,97 +887,103 @@ const slicedImages = {
         sessionHighScore = 0; // 初始化本局最高分數
         
         // 生成水果和炸彈
-        function spawnFruit() {
-            if (isPaused) return;
-            
-            const isbomb = Math.random() < 0.2;
-const imgSrc = isbomb 
- ? bombImages[Math.floor(Math.random() * bombImages.length)] 
-  : fruitImages[Math.floor(Math.random() * fruitImages.length)];
+function spawnFruit() {
+    if (isPaused) return;
 
-const fruit = document.createElement('div');
-fruit.className = isbomb ? 'bomb' : 'fruit';
-fruit.dataset.type = isbomb ? 'bomb' : 'fruit';
-fruit.dataset.src = imgSrc; // 存原始圖片路徑
+    // 限制場上同時最多 8 個水果
+    if (fruits.length >= 8) return;
 
-// 加圖片
-const img = document.createElement('img');
-img.src = imgSrc;
-img.className = 'fruit-img';
-fruit.appendChild(img);
+    const isBomb = Math.random() < 0.2;
+    const imgSrc = isBomb 
+        ? bombImages[Math.floor(Math.random() * bombImages.length)] 
+        : fruitImages[Math.floor(Math.random() * fruitImages.length)];
 
+    const fruit = document.createElement('div');
+    fruit.className = isBomb ? 'bomb' : 'fruit';
+    fruit.dataset.type = isBomb ? 'bomb' : 'fruit';
+    fruit.dataset.src = imgSrc;
 
-            
-            // 從螢幕四邊隨機拋出
-            const side = Math.floor(Math.random() * 4);
-            let startX, startY, targetX, targetY;
-            
-            switch(side) {
-                case 0: // 左邊
-                    startX = -50;
-                    startY = Math.random() * window.innerHeight;
-                    targetX = window.innerWidth + 50;
-                    targetY = Math.random() * window.innerHeight;
-                    break;
-                case 1: // 右邊
-                    startX = window.innerWidth + 50;
-                    startY = Math.random() * window.innerHeight;
-                    targetX = -50;
-                    targetY = Math.random() * window.innerHeight;
-                    break;
-                case 2: // 上邊
-                    startX = Math.random() * window.innerWidth;
-                    startY = -50;
-                    targetX = Math.random() * window.innerWidth;
-                    targetY = window.innerHeight + 50;
-                    break;
-                case 3: // 下邊
-                    startX = Math.random() * window.innerWidth;
-                    startY = window.innerHeight + 50;
-                    targetX = Math.random() * window.innerWidth;
-                    targetY = -50;
-                    break;
-            }
-            
-            fruit.style.left = startX + 'px';
-            fruit.style.top = startY + 'px';
-            
-            gameArea.appendChild(fruit);
-            fruits.push({
-                element: fruit,
-                startX,
-                startY,
-                targetX,
-                targetY,
-                progress: 0,
-                sliced: false
-            });
+    // 加圖片
+    const img = document.createElement('img');
+    img.src = imgSrc;
+    img.className = 'fruit-img';
+    fruit.appendChild(img);
+
+    // 從螢幕四邊隨機拋出
+    const side = Math.floor(Math.random() * 4);
+    let startX, startY, targetX, targetY;
+
+    switch(side) {
+        case 0: // 左邊
+            startX = -50;
+            startY = Math.random() * window.innerHeight;
+            targetX = window.innerWidth + 50;
+            targetY = Math.random() * window.innerHeight;
+            break;
+        case 1: // 右邊
+            startX = window.innerWidth + 50;
+            startY = Math.random() * window.innerHeight;
+            targetX = -50;
+            targetY = Math.random() * window.innerHeight;
+            break;
+        case 2: // 上邊
+            startX = Math.random() * window.innerWidth;
+            startY = -50;
+            targetX = Math.random() * window.innerWidth;
+            targetY = window.innerHeight + 50;
+            break;
+        case 3: // 下邊
+            startX = Math.random() * window.innerWidth;
+            startY = window.innerHeight + 50;
+            targetX = Math.random() * window.innerWidth;
+            targetY = -50;
+            break;
+    }
+
+    fruit.style.left = startX + 'px';
+    fruit.style.top = startY + 'px';
+
+    gameArea.appendChild(fruit);
+
+    fruits.push({
+        element: fruit,
+        startX,
+        startY,
+        targetX,
+        targetY,
+        progress: 0,
+        sliced: false
+    });
+}
+
+// 更新水果位置
+function updateFruits() {
+    if (isPaused) return;
+
+    // 倒序遍歷，避免 splice 出錯
+    for (let i = fruits.length - 1; i >= 0; i--) {
+        let fruit = fruits[i];
+        if (fruit.sliced) continue;
+
+        fruit.progress += 0.008;
+
+        // 超出範圍 → 移除
+        if (fruit.progress >= 1) {
+            fruit.element.remove();
+            fruits.splice(i, 1);
+            continue;
         }
-        
-        // 更新水果位置
-        function updateFruits() {
-            if (isPaused) return;
-            
-            fruits.forEach((fruit, index) => {
-                if (fruit.sliced) return;
-                
-                fruit.progress += 0.008;
-                
-                if (fruit.progress >= 1) {
-                    fruit.element.remove();
-                    fruits.splice(index, 1);
-                    return;
-                }
-                
-                // 拋物線運動
-                const t = fruit.progress;
-                const x = fruit.startX + (fruit.targetX - fruit.startX) * t;
-                const y = fruit.startY + (fruit.targetY - fruit.startY) * t + Math.sin(t * Math.PI) * -200;
-                
-                fruit.element.style.left = x + 'px';
-                fruit.element.style.top = y + 'px';
-            });
-        }
+
+        // 模擬拋物線運動
+        const t = fruit.progress;
+        const x = fruit.startX + (fruit.targetX - fruit.startX) * t;
+        const y = fruit.startY + (fruit.targetY - fruit.startY) * t + Math.sin(t * Math.PI) * -200;
+
+        fruit.element.style.left = x + 'px';
+        fruit.element.style.top = y + 'px';
+    }
+}
+
         
         // 滑鼠和觸控事件
         function startSlice(e) {
@@ -1676,6 +1682,45 @@ loadTrack(0);
 pause();
 
 
+// 建立偵測器元素
+const statsPanel = document.createElement("div");
+statsPanel.style.position = "fixed";
+statsPanel.style.bottom = "10px";
+statsPanel.style.left = "10px";
+statsPanel.style.background = "rgba(0,0,0,0.6)";
+statsPanel.style.color = "#0f0";
+statsPanel.style.fontSize = "14px";
+statsPanel.style.padding = "5px 10px";
+statsPanel.style.borderRadius = "6px";
+statsPanel.style.fontFamily = "monospace";
+statsPanel.style.zIndex = "9999";
+document.body.appendChild(statsPanel);
+
+// FPS 計算
+let lastTime = performance.now();
+let frameCount = 0;
+let fps = 0;
+
+function updateStats() {
+    const now = performance.now();
+    frameCount++;
+
+    if (now - lastTime >= 1000) { // 每秒更新一次 FPS
+        fps = frameCount;
+        frameCount = 0;
+        lastTime = now;
+    }
+
+    // 顯示 FPS 與場上水果數量
+    statsPanel.textContent = `FPS: ${fps} | Fruits: ${fruits.length}`;
+    
+    requestAnimationFrame(updateStats);
+}
+
+// 啟動監測
+updateStats();
+
+
         // 暫停/繼續
         function togglePause() {
             isPaused = !isPaused;
@@ -1734,4 +1779,5 @@ function restartGame() {
   </script>
   <div class="credit">感謝 黃韋傑學者 提供</div>
 </body>
+
 </html>
