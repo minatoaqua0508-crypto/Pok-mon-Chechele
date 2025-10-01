@@ -891,7 +891,7 @@ function spawnFruit() {
     if (isPaused) return;
 
     // 限制場上同時最多 8 個水果
-    if (fruits.length >= 8) return;
+    if (fruits.length >= 2) return;
 
     const isBomb = Math.random() < 0.2;
     const imgSrc = isBomb 
@@ -1083,7 +1083,7 @@ const slicedSounds = {
     'imags/roc4.png': 'sounds/roc sound1.mp3',
 
 
-    'imags/logo1.jpg': 'sounds/sound1.mp3',
+    'imags/logo1.png': 'sounds/sound1.mp3',
     'imags/logo2.jpg': 'sounds/sound2.mp3',
     'imags/logo4.png': 'sounds/sound4.mp3',
     'imags/logo5.png': 'sounds/sound5.mp3',
@@ -1165,7 +1165,7 @@ const slicedSounds = {
         
         // 特殊水果修正：images/
 const specialFruitMap = {
-  'imags/logo1.jpg': { after: 'imags/logo1.jpg', sound: 'sounds/sound1.mp3' },
+  'imags/logo1.png': { after: 'imags/logo1.jpg', sound: 'sounds/sound1.mp3' },
   'imags/logo2.jpg': { after: 'imags/logo2.jpg',  sound: 'sounds/sound2.mp3' },
   'imags/logo4.png': { after: 'imags/logo4.png', sound: 'sounds/sound4.mp3' },
   'imags/logo5.png': { after: 'imags/logo5.png', sound: 'sounds/sound5.mp3' },
